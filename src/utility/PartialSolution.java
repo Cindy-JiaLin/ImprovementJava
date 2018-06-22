@@ -18,7 +18,7 @@ public class PartialSolution
   public boolean refine(){ if(trace==null) return false; else return trace.refine();}    
   
   public String toString(){ return (trace == null ? "" : ""+trace);} 
-  public String beautify(){ return (trace == null ? "" : tarce.beautify());} 
+  public String beautify(){ return (trace == null ? "" : trace.beautify());} 
   public String html(){ return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
 
   public static PartialSolution[] deleteFirst(PartialSolution[] cands)
@@ -95,41 +95,51 @@ public class PartialSolution
     if(T.isSTRING())
     { PrimString sourceStr = (PrimString)this.a;
       PrimString targetStr = (PrimString)this.b;
+      TypeT memSource = sourceStr.charAt(getSource());
+      TypeT memTarget = targetStr.charAt(getTarget())
       if(targetStr.weight() ==  getTarget())
       { if(sourceStr.weight() == getSource()) return new PartialSolution[0];
-        else return new PartialSolution[]{ delete(T)};
+        else return new PartialSolution[]{ delete(memSource)};
       }
       else if(sourceStr.weight() == getSource()) 
-           return new PartialSolution[]{ insert(T)};
-      else if(sourceStr.charAt(getSource()) == targetStr.charAt(getTarget())) 
-           return new PartialSolution[]{ copy(T)};
-      else return new PartialSolution[]{ insert(T), delete(T)};
+           return new PartialSolution[]{ insert(memTarget)};
+      else if(memSource == memTarget) 
+           return new PartialSolution[]{ copy(memSource)};
+      else return new PartialSolution[]{ insert(memTarget), delete(memSource)};
     }
     /*TypeProduct*/
-    else if(T.isPRODUCT()) return new PartialSolution[]{ change(T)};
+    else if(T.isPRODUCT())
+    { TypeProduct sourceProduct = (TypeProduct)this.a;
+      TypeProduct targetProduct = (TypeProduct)this.b;
+      TypeT memSource = sourceProduct.getValues().get(getSource());
+      TypeT memTarget = targetProduct.getValues().get(getTarget());
+      return new PartialSolution[]{ change(memSource, memTarget)};
+    }
     /*TypeUnion*/
     else if(T.isUNION()) 
     { TypeUnion sourceUnion = (TypeUnion)this.a;
       TypeUnion targetUnion = (TypeUnion)this.b;
       if(sourceUnion.getLabel().equals(targetUnion.getLabel())) 
-        return new PartialSolution[]{ replace(T)};
-      else return new PartialSolution[]{ change(T)};
+        return new PartialSolution[]{ replace(sourceUnion,targetUnion)};
+      else return new PartialSolution[]{ change(sourceUnion.getValue(),targetUnion.getValue())};
     }
     /*TypeList*/
     else if(T.isLIST())
     { TypeList sourceList = (TypeList)this.a;
       TypeList targetList = (TypeList)this.b;
+      TypeT memSource = sourceList.get(getSource());
+      TypeT memTarget = targetList.get(getTarget());
       if(targetList.size() ==  getTarget())
       { if(sourceList.size() == getSource()) return new PartialSolution[0];
-        else return new PartialSolution[]{ delete(T)};
+        else return new PartialSolution[]{ delete(memSource)};
       }
       else if(sourceList.size() == getSource()) 
-             return new PartialSolution[]{ insert(T)};
-      else if(sourceList.get(getSource()).weight()==0) 
-             return new PartialSolution[]{ delete(T), insert(T)};// delete an empty line 
-      else if(targetList.get(getTarget()).weight()==0) 
-             return new PartialSolution[]{ delete(T), insert(T)};// insert an empty line
-      else return new PartialSolution[]{ change(T), insert(T), delete(T)};
+             return new PartialSolution[]{ insert(memTarget)};
+      else if(memSource.weight()==0)// delete an empty line  
+             return new PartialSolution[]{ delete(memSource), insert(memTarget)};
+      else if(memTarget.weight()==0)// insert an empty line
+             return new PartialSolution[]{ delete(memSource), insert(memTarget)};      
+      else return new PartialSolution[]{ change(memSource, memTarget), insert(memTarget), delete(memSource)};
     }
     /*TypeSet*/
     else if(T.isSET())
@@ -137,11 +147,11 @@ public class PartialSolution
       TypeSet targetSet = (TypeSet)this.b;
       if(targetSet.size() ==  getTarget())
       { if(sourceSet.size() == getSource()) return new PartialSolution[0];
-        else return new PartialSolution[]{ delete(T)};
+        else return new PartialSolution[]{ delete(sourceSet.get(getSource()))};
       }
       else if(sourceSet.size() == getSource())
       { if(trace==null||(!this.trace.getTargetValues().contains(targetSet.get(getTarget())))) 
-          return new PartialSolution[]{ insert(T)};
+          return new PartialSolution[]{ insert(targetSet.get(getTarget()))};
         else return new PartialSolution[0];
       }
       else// when both are non-empty
@@ -150,13 +160,13 @@ public class PartialSolution
         int k=0;// k is the number of repeat insertion elements in b
         for(int i=0; i<targets.length; i++)
         { if(trace == null||(!trace.getTargetValues().contains(targets[i])))
-            temp[2*i]=change(T.getBaceTYPE(), sourceSet.get(getSource()), targets[i]);//
+            temp[2*i]=change(sourceSet.get(getSource()), targets[i]);//
           else {temp[2*i]=null; k++;}
           if(trace == null||(!trace.getTargetValues().contains(targets[i])))
-            temp[2*i+1]=insert(T, targets[i]);
+            temp[2*i+1]=insert(targets[i]);
           else {temp[2*i+1]=null; k++;}
         }
-        temp[2*targets.length]=delete(T);
+        temp[2*targets.length]=delete(sourceSet.get(getSource()));
         //return temp;
         if(k==0) return temp;
         else
@@ -171,74 +181,30 @@ public class PartialSolution
     /*Other Types*/
   }
 
-  private PartialSolution delete(TYPE T, TypeT memSource)
-  { EditOperation op = new Delete(memSource)deletion(T, this.a);
+  private PartialSolution delete(TypeT memSource)
+  { EditOperation op = new Delete(memSource);
     Trace trace = new Trace(this.trace, op, this.a, this.b);
     return new PartialSolution(trace, this.a, this.b);
   }        
-  private PartialSolution insert(TYPE T)
-  { EditOperation op = insertion(T, this.b);
+  private PartialSolution insert(TypeT memTarget)
+  { EditOperation op = new Insert(memTarget);
     Trace trace = new Trace(this.trace, op, this.a, this.b);
     return new PartialSolution(trace, this.a, this.b);
   }        
-  private PartialSolution copy(TYPE T)
-  { EditOperation op = duplication(T, this.a);
+  private PartialSolution copy(TypeT memSource)
+  { EditOperation op = new Copy(memSource);
     Trace trace = new Trace(this.trace, op, this.a, this.b);
     return new PartialSolution(trace, this.a, this.b);
   }  
-  private PartialSolution change(TYPE T)
-  { EditOperation op = modification(T, this.a, this.b);
+  private PartialSolution change(TypeT memSource, TypeT memTarget)
+  { TYPE memT = memSource.typeOf();
+    EditOperation op = new Change(Diff.newDiff(memT, memSource, memTarget));
     Trace trace = new Trace(this.trace, op, this.a, this.b);
     return new PartialSolution(trace, this.a, this.b);
   }
-  private PartialSolution change(TYPE memT, TypeT memSource, TypeT memTarget)
-  { EditOperation op = new Change(Diff.newDiff(memT, memSource, memTarget));
+  private PartialSolution replace(TypeT memSource, TypeT memTarget)
+  { EditOperation op = new Replace(memSource, memTarget);
     Trace trace = new Trace(this.trace, op, this.a, this.b);
     return new PartialSolution(trace, this.a, this.b);
-  }
-  private PartialSolution replace(TYPE T)
-  { EditOperation op = replacement(T, this.a, this.b);
-    Trace trace = new Trace(this.trace, op, this.a, this.b);
-    return new PartialSolution(trace, this.a, this.b);
-  }
-  
-  private EditOperation deletion(TYPE T, TypeT source)
-  { if(T.isSTRING()) return new Delete((PrimString)source.charAt(getSource()));
-    else if(T.isPRODUCT()) return new Delete((TypeProduct)source.getValues().get(getSource()));
-    else if(T.isUNION) return new Delete((TypeUnion)source); 
-    else if(T.isSET()) return new Delete((TypeSet)source.get(getSource()));
-    else if(T.isLIST()) return new Delete((TypeList)source.get(getSource()));
-    else if(T.isMSET()) return new Delete((TypeMultiset)source.get(getSource()));
-    else return new Delete((TypeMapping)source.get(getSource()));
-  }
-  private EditOperation insertion(TYPE T, TypeT target)
-  { if(T.isSTRING()) return new Insert((PrimString)target.charAt(getTarget()));
-    else if(T.isPRODUCT()) return new Insert((TypeProduct)target.getValues().get(getTarget()));
-    else if(T.isUNION) return new Insert((TypeUnion)target); 
-    else if(T.isSET()) return new Insert((TypeSet)target.get(getTarget()));
-    else if(T.isLIST()) return new Insert((TypeList)target.get(getTarget()));
-    else if(T.isMSET()) return new Insert((TypeMultiset)target.get(getTarget()));
-    else return new Insert((TypeMapping)target.get(getTarget()));
-  }
-  private EditOperation duplication(TYPE T, TypeT source)
-  { if(T.isSTRING()) return new Copy((PrimString)source.charAt(getSource()));
-    else if(T.isPRODUCT()) return new Copy((TypeProduct)source.getValues().get(getSource()));
-    else if(T.isUNION) return new Copy((TypeUnion)source); 
-    else if(T.isSET()) return new Copy((TypeSet)source.get(getSource()));
-    else if(T.isLIST()) return new Copy((TypeList)source.get(getSource()));
-    else if(T.isMSET()) return new Copy((TypeMultiset)source.get(getSource()));
-    else return new Copy((TypeMapping)source.get(getSource()));
-  }
-  private EditOperation modification(TYPE T, TypeT source, TypeT target)
-  { TypeT memSource = TypeT.baseValue(T, source, getSource());// member of the source
-    TypeT memTarget = TypeT.baseValue(T, target, getTarget());// member of the target
-    TYPE memT = memSource.typeOf();// member TYPE 
-    return new Change(Diff.newDiff(memT, memSource, memTarget));
-  }
-  // only Union type needs this replacement
-  // when labels are not the same
-  private EditOperation replacement(TYPE T, TypeT source, TypeT target)
-  { if(T.isUNION) return new Replace((TypeUnion)source, (TypeUnion)target); 
-    else throw new RuntimeException("Replacement is only develped for different labeled values of UNION TYPE");
   }
 }
