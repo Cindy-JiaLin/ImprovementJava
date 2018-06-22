@@ -47,9 +47,8 @@ public final class Sim implements Comparable<Sim>
   public Sim dec(double r){ return new Sim(this.dlwb, this.dupb-r, this.den);}
   
   public boolean isFinal()
-  { if(discrete) return this.num1==this.num2; 
-    else return Math.abs(this.dlwb-this.dupb) < 1.0E-8;
-  }
+  { if(discrete) return this.num1==this.num2; else return Math.abs(this.dlwb-this.dupb) < 1.0E-8;}
+
   public boolean isEqual(){ return this.num1==this.den && this.num2==this.den;}// real number will never equal
   public boolean isUnknown(){ return this.num1==0 && this.num2==this.den;}
   

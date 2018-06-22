@@ -16,59 +16,59 @@ public class Main
 { public static boolean VERBOSE = false;// if true all intermediate states will be logged
   public static boolean SIM = false;// displays similarity as percentage
   public static boolean DIFF = false;// displays difference as a solution (PartialSolution) 
-  public static boolean INFO = false;// displays runtime statistics
-    
+  //public static boolean INFO = false;// displays runtime statistics
+  public static boolean HTMLCODE=false;// displays difference as text
+  public static boolean BEAUTIFY=false;// displays difference in colour box
+  public static boolean UNICODE=false;// displays difference in Unicode Point Code
+
+  private static String htmlFileName;
+
   public static void main(String[] args) throws UnsupportedEncodingException
   { final long startTime = System.currentTimeMillis();
     if(Options.isSet(args, "-verbose")) { VERBOSE = true; args = Options.remove(args, "-verbose");}
     if(Options.isSet(args, "-sim")) { SIM = true; args = Options.remove(args, "-sim");}
     if(Options.isSet(args, "-diff")) { DIFF = true; args = Options.remove(args, "-diff");}
-    
+    if(Options.isSet(args, "-beautify")) { BEAUTIFY = true; args = Options.remove(args, "-beautify");}
+    if(Options.isSet(args, "-unicode")) { UNICODE = true; args = Options.remove(args, "-unicode");}
+    // get file numbers
+    htmlFileName=Options.getOption(args, "-html");//get the arg after the -html
+    if(htmlFileName!=null){ HTMLCODE=true; args=Options.remove(args,"-html", htmlFileName);}
     String typeFileName=Options.getOption(args, "-type");//get the arg after the -type
     if(typeFileName!=null) args = Options.remove(args, "-type", typeFileName);
-
     String sourceFileName = Options.getOption(args, "-source");// get the arg after the -source
     if(sourceFileName!=null) args = Options.remove(args, "-source", sourceFileName);
-      
     String targetFileName = Options.getOption(args, "-target");// get the arg after the -target
     if(targetFileName!=null) args = Options.remove(args, "-target", targetFileName);
 
+    // get TYPE 
     String strTYPE = null;
-    if(typeFileName==null)
-    { strTYPE = Options.getFirst(args); args = Options.removeFirst(args);
-      //System.out.println("strTYPE: "+strTYPE);
-    }
+    if(typeFileName==null){ strTYPE = Options.getFirst(args); args = Options.removeFirst(args);}
     else strTYPE = Options.getFileContentsAsString(typeFileName);
-    //System.out.println("strTYPE: "+strTYPE);
     List<String> lovs = new ArrayList<String>();
     TYPE resTYPE=ParseTYPEresult.parseTYPE(lovs, strTYPE).getResult();//parse TYPE
-    System.out.println("resTYPE: \n"+resTYPE);
-
+   
+    // get source value
     String source = null;
     // if sourceFileName is null get the first arg as source string to be compared
-    if(sourceFileName==null) 
-    { source = Options.getFirst(args); args = Options.removeFirst(args);
-      //System.out.println("source: "+source);
-    }
+    if(sourceFileName==null) { source = Options.getFirst(args); args = Options.removeFirst(args);}
     else source = Options.getFileContentsAsString(sourceFileName);
-    //System.out.println("source: "+source);
     TypeT resV1=ParseVALUEresult.parseVALUE(resTYPE, source).getResult();//parse VALUE1 
-    System.out.println("resV1: \n"+resV1);
     
+    // get target value
     String target = null;
     // if targetFileName is null get the first arg as target string to be compared
-    if(targetFileName==null) 
-    { target = Options.getFirst(args); args = Options.removeFirst(args);
-      //System.out.println("target: "+target);
-    }
+    if(targetFileName==null) { target = Options.getFirst(args); args = Options.removeFirst(args);}
     else target = Options.getFileContentsAsString(targetFileName);
-    //System.out.println("target: "+target);
     TypeT resV2=ParseVALUEresult.parseVALUE(resTYPE, target).getResult();//parse VALUE2
-    System.out.println("resV2: \n"+resV2);
 
+    // model values with their TYPE, in particular for REC TYPE
     TypeT model1 = model(resTYPE, resV1);
     TypeT model2 = model(resTYPE, resV2);
-        
+    
+    //System.out.println("TYPE: "+resTYPE+"\n");
+    //System.out.println("SOURCE: "+model1+"\n");
+    //System.out.println("TARGET: "+model2+"\n");
+    
     if(VERBOSE)
     { System.out.println("SOURCE:"); System.out.println(resV1);
       System.out.println("TARGET:"); System.out.println(resV2);
@@ -79,16 +79,30 @@ public class Main
       else
       { Diff diff = Diff.newDiff(resTYPE, model1, model2)
         for(; !diff.refine(); );
-        if(!(VERBOSE) && (DIFF)) 
-           Encoding.printUnicode(""+diff.getSolution());
-        if(SIM) 
-           System.out.println(diff.getSim().getPercentage());
+        if(!VERBOSE && DIFF && UNICODE) Encoding.printUnicode(""+diff.getSolution().beautify());
+        //if(!VERBOSE && DIFF && BEAUTIFY) System.out.println(diff.getSolution().beautify());
+        //if(!VERBOSE && DIFF) System.out.println(""+diff.getSolution());
+        if(HTMLCODE) writeHTML(diff.html());
+        if(SIM) System.out.println(diff.getSim().getPercentage());
       }
     }
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;
     System.out.println("duration:"+totalTime+"s");
-  }  
+  }
+
+  // build a html file and present diff in html format
+  private static void writeHTML(String table)
+  { if(this.htmlFileName!=null)
+    try
+    { FileWriter out = new FileWriter(this.htmlFileName);
+      out.write(HTML.BODY(table));
+      out.flush();
+      out.close();
+    }  
+    catch(IOException e){ System.err.println("Promblem writing to:"+htmlFileName);}
+  }    
+ 
   // model values with their TYPE
   // factory method 
   public static TypeT model(TYPE T, TypeT t)
