@@ -2,8 +2,7 @@ package utility;
 
 import value.TypeT;
 import sim.Sim;
-import dcprototype.Console;
-import dcprototype.HTML;
+import dcprototype.*;
 
 public class Delete extends EditOperation
 { private final TypeT value;
@@ -19,7 +18,7 @@ public class Delete extends EditOperation
   public String html(int ia, int ib)
   { return HTML.TD("")+
            HTML.TD(HTML.DEL,ia)+
-    (SIM ? HTML.TD("") : "")+
+    (Main.SIM ? HTML.TD("") : "")+
            HTML.TD(HTML.DEL, HTML.encode(""+this.value));
   }
 }

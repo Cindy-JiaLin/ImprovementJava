@@ -7,6 +7,8 @@ import type.*;
 import value.*;
 import dcprototype.*;
 
+import utility.PartialSolution;
+
 public class ProductDiff extends Diff 
 { private final TypeProduct a, b;
   private PartialSolution[] candidates;
@@ -21,13 +23,12 @@ public class ProductDiff extends Diff
     if(a.size()!=b.size()) 
        throw new RuntimeException("Different size Product values cannot be compared.");
     this.a=a; this.b=b;
-    this.candidates = new PartialSolution[] { new PartialSolution(null)};
+    this.candidates = new PartialSolution[] { new PartialSolution(null,a,b)};
   }        
   
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());} 
   public Sim getSim(){ return this.candidates[0].getSim();}
-  public PartialSolution getSolution(){ return this.candidates[0];}  
-
+ 
   public String toString(){ return this.candidates[0].toString();}
   public String beautify(){ return this.candidates[0].beautify();}
   public String html(){ return this.candidates[0].html();}
@@ -41,7 +42,7 @@ public class ProductDiff extends Diff
       System.out.println();
     }
     // the initial state, the trace is null, outside refine is needed
-    if(this.candidates[0].trace==null)
+    if(this.candidates[0].trace()==null)
     { this.candidates = PartialSolution.insertAll(this.candidates[0].expand(), PartialSolution.deleteFirst(this.candidates));
       Arrays.sort(this.candidates, simComparator);
       return false;

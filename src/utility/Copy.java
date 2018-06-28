@@ -2,8 +2,7 @@ package utility;
 
 import value.TypeT;
 import sim.Sim;
-import dcprototype.Console;
-import dcprototype.HTML;
+import dcprototype.*;
 
 public class Copy extends EditOperation
 { private final TypeT value;
@@ -19,7 +18,7 @@ public class Copy extends EditOperation
   public String html(int ia, int ib)
   { return HTML.TD(HTML.CPY,ia)+
            HTML.TD(HTML.CPY,ib)+
-    (SIM ? HTML.TD("") : "")+
+    (Main.SIM ? HTML.TD("") : "")+
            HTML.TD(HTML.CPY, HTML.encode(""+this.value));
   }
 }

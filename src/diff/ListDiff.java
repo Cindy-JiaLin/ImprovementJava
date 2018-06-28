@@ -1,9 +1,12 @@
 package diff;
 
-import sim.Sim;
+import java.util.Arrays;
+import sim.*;
 import type.*;
 import value.*;
 import dcprototype.*;
+
+import utility.PartialSolution;
 
 public class ListDiff extends Diff 
 { private final TypeList a, b;
@@ -15,14 +18,13 @@ public class ListDiff extends Diff
   { if(!a.getBaseTYPE().equals(b.getBaseTYPE()))
       throw new RuntimeException("These two lists have different base type values.");
     this.a=a; this.b=b;
-    this.candidates = new PartialSolution[] { new PartialSolution(null)};
+    this.candidates = new PartialSolution[] { new PartialSolution(null,a,b)};
   }        
   public TypeT getSourceValue(){ return this.a;}
   public TypeT getTargetValue(){ return this.b;}
  
   public Sim getSim(){ return this.candidates[0].getSim();}  
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
-  public PartialSolution getSolution(){ return this.candidates[0];}
   
   public String toString(){ return this.candidates[0].toString();}
   public String beautify(){ return this.candidates[0].beautify();}
@@ -37,8 +39,8 @@ public class ListDiff extends Diff
       System.out.println();
     }
     // the initial state, the trace is null, outside refine is needed
-    if(this.candidates[0].trace==null)
-    { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
+    if(this.candidates[0].trace()==null)
+    { this.candidates = PartialSolution.insertAll(this.candidates[0].expand(), PartialSolution.deleteFirst(this.candidates));
       Arrays.sort(this.candidates, simComparator);
       return false;
     }
@@ -52,7 +54,7 @@ public class ListDiff extends Diff
     }
     else if (isFinal()){ return true;}    
     else// when each edit operation has been completely refined, expand one more step
-    { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
+    { this.candidates = PartialSolution.insertAll(this.candidates[0].expand(), PartialSolution.deleteFirst(this.candidates));
       Arrays.sort(this.candidates, simComparator);
       return false;
     }

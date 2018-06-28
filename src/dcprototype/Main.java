@@ -74,14 +74,13 @@ public class Main
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { if(model1.weight()==0 && model2.weight==0)// empty value (Lists, Sets, Multisets and Mappings)
+    { if(model1.weight()==0 && model2.weight()==0)// empty value (Lists, Sets, Multisets and Mappings)
         System.out.println(Console.cpy(""+model1));
       else
-      { Diff diff = Diff.newDiff(resTYPE, model1, model2)
+      { Diff diff = Diff.newDiff(resTYPE, model1, model2);
         for(; !diff.refine(); );
-        if(!VERBOSE && DIFF && UNICODE) Encoding.printUnicode(""+diff.getSolution().beautify());
-        //if(!VERBOSE && DIFF && BEAUTIFY) System.out.println(diff.getSolution().beautify());
-        //if(!VERBOSE && DIFF) System.out.println(""+diff.getSolution());
+        if(!VERBOSE && DIFF && UNICODE) Encoding.printUnicode(diff.beautify());
+        //if(!VERBOSE && DIFF) System.out.println(""+diff);
         if(HTMLCODE) writeHTML(diff.html());
         if(SIM) System.out.println(diff.getSim().getPercentage());
       }
@@ -93,9 +92,9 @@ public class Main
 
   // build a html file and present diff in html format
   private static void writeHTML(String table)
-  { if(this.htmlFileName!=null)
+  { if(htmlFileName!=null)
     try
-    { FileWriter out = new FileWriter(this.htmlFileName);
+    { FileWriter out = new FileWriter(htmlFileName);
       out.write(HTML.BODY(table));
       out.flush();
       out.close();

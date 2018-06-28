@@ -1,25 +1,32 @@
 package utility;
 
+import java.util.ArrayList;
+
 import type.TYPE;
-import value.TypeT;
+import value.*;
+import diff.Diff;
 import sim.Sim;
 import dcprototype.*;
 
 public class PartialSolution  
 { private final Trace trace;
   private final TypeT a,b; 
-  private PartialSolution(Trace trace, TypeT a, TypeT b)
+  public PartialSolution(Trace trace, TypeT a, TypeT b)
   { this.trace = trace; this.a=a; this.b=b;}
-   
-  public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
-  public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
+  
+  public Trace trace(){ return this.trace;} 
+  public int getSource(){ return (this.trace == null ? 0 : trace.ia());}
+  public int getTarget(){ return (this.trace == null ? 0 : trace.ib());}
   public Sim getSim(){ return (trace == null ? Sim.UNKNOWN(this.a.weight()+this.b.weight()):trace.getSim());}
         
   public boolean refine(){ if(trace==null) return false; else return trace.refine();}    
   
   public String toString(){ return (trace == null ? "" : ""+trace);} 
   public String beautify(){ return (trace == null ? "" : trace.beautify());} 
-  public String html(){ return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
+  public String html()
+  { return HTML.TABLE(trace.html()+
+    (Main.SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));
+  }
 
   public static PartialSolution[] deleteFirst(PartialSolution[] cands)
   { PartialSolution[] res = new PartialSolution[cands.length-1];
@@ -56,22 +63,22 @@ public class PartialSolution
   // Get the last copy operation position
   public int getStopper(Trace trace)
   { if(trace == null) return -1;
-    else if(trace.op instanceof Copy) return trace.ia;
-    else return getStopper(trace.trace);
+    else if(trace.op() instanceof Copy) return trace.ia();
+    else return getStopper(trace.trace());
   }  
   // Get the last delete operation position
   public int getLastDelete(Trace trace)
   { if(trace == null) return -1;
-    else if(trace.op instanceof Copy) return -1;
-    else if(trace.op instanceof Delete) return trace.ia;
-    else return getLastDelete(trace.trace);
+    else if(trace.op() instanceof Copy) return -1;
+    else if(trace.op() instanceof Delete) return trace.ia();
+    else return getLastDelete(trace.trace());
   } 
   // Get the last insert operation position
   public int getLastInsert(Trace trace)
   { if(trace == null) return -1;
-    else if(trace.op instanceof Copy) return -1;
-    else if(trace.op instanceof Insert) return trace.ib;
-    else return getLastInsert(trace.trace);
+    else if(trace.op() instanceof Copy) return -1;
+    else if(trace.op() instanceof Insert) return trace.ib();
+    else return getLastInsert(trace.trace());
   }
   // let x, y be two characters -x, +y and +y, -x is the same partial solution
   // this isRedundant method is used to pick out such partial solution
@@ -89,14 +96,14 @@ public class PartialSolution
     return false;
   }
 
-  private PartialSolution[] expand()
+  public PartialSolution[] expand()
   { TYPE T=this.a.typeOf();
     /*PrimString*/
     if(T.isSTRING())
     { PrimString sourceStr = (PrimString)this.a;
       PrimString targetStr = (PrimString)this.b;
-      TypeT memSource = sourceStr.charAt(getSource());
-      TypeT memTarget = targetStr.charAt(getTarget())
+      TypeT memSource = new PrimChar(TYPE.CHAR, sourceStr.charAt(getSource()));
+      TypeT memTarget = new PrimChar(TYPE.CHAR, targetStr.charAt(getTarget()));
       if(targetStr.weight() ==  getTarget())
       { if(sourceStr.weight() == getSource()) return new PartialSolution[0];
         else return new PartialSolution[]{ delete(memSource)};
@@ -155,22 +162,22 @@ public class PartialSolution
         else return new PartialSolution[0];
       }
       else// when both are non-empty
-      { TypeT[] targets = getTargetValues();
-        PartialSolution[] temp = new PartialSolution[2*targets.length+1];
+      { ArrayList<TypeT> targets = trace.getTargetValues();
+        PartialSolution[] temp = new PartialSolution[2*targets.size()+1];
         int k=0;// k is the number of repeat insertion elements in b
-        for(int i=0; i<targets.length; i++)
-        { if(trace == null||(!trace.getTargetValues().contains(targets[i])))
-            temp[2*i]=change(sourceSet.get(getSource()), targets[i]);//
+        for(int i=0; i<targets.size(); i++)
+        { if(trace == null||(!trace.getTargetValues().contains(targets.get(i))))
+            temp[2*i]=change(sourceSet.get(getSource()), targets.get(i));//
           else {temp[2*i]=null; k++;}
-          if(trace == null||(!trace.getTargetValues().contains(targets[i])))
-            temp[2*i+1]=insert(targets[i]);
+          if(trace == null||(!trace.getTargetValues().contains(targets.get(i))))
+            temp[2*i+1]=insert(targets.get(i));
           else {temp[2*i+1]=null; k++;}
         }
-        temp[2*targets.length]=delete(sourceSet.get(getSource()));
+        temp[2*targets.size()]=delete(sourceSet.get(getSource()));
         //return temp;
         if(k==0) return temp;
         else
-        { PartialSolution[] res = new PartialSolution[2*targets.length+1-k];
+        { PartialSolution[] res = new PartialSolution[2*targets.size()+1-k];
           int n=0;
           for(int i=0; i<temp.length; i++)
             if(temp[i]!=null) res[n++]=temp[i];
@@ -178,7 +185,7 @@ public class PartialSolution
         }
       }
     }
-    /*Other Types*/
+    else throw new RuntimeException("expand() for other TYPE.");
   }
 
   private PartialSolution delete(TypeT memSource)

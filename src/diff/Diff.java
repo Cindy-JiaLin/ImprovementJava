@@ -4,12 +4,20 @@ import sim.Sim;
 import type.TYPE;
 import value.*;
 
+import utility.PartialSolution;
 
 public abstract class Diff 
 { public abstract boolean isFinal();
   public abstract boolean refine();
+  
+  public abstract TypeT getSourceValue();
+  public abstract TypeT getTargetValue();
+ 
   public abstract Sim getSim();
   public abstract Sim getUnknown();
+
+  public abstract String beautify();
+  public abstract String html();
   
   // a factory method
   public static Diff newDiff(TYPE T, TypeT source, TypeT target)

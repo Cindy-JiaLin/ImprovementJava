@@ -1,6 +1,6 @@
 package diff;
 
-import sim.Sim;
+import sim.*;
 import type.*;
 import dcprototype.*;
 
@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.ArrayList;
 
+import utility.PartialSolution;
 
 // Diff between PrimUnit, PrimBool, PrimChar, PrimNat, PrimInt
 public class PrimDiff extends Diff 
@@ -25,7 +26,6 @@ public class PrimDiff extends Diff
   public TypeT getTargetValue(){ return this.b;}
 
   public Sim getUnknown(){ return Sim.UNKNOWN(2);}// the weight of primitive type value is 1
-  public String getSolution(){ return toString();} 
   
   public Sim getSim()
   { TYPE t = this.a.typeOf();
@@ -63,7 +63,7 @@ public class PrimDiff extends Diff
     else throw new RuntimeException("Type error, must be the primitive type.");
      
   }
-  pubilc String beautify()
+  public String beautify()
   { TYPE t = this.a.typeOf();
     if(t.isPRIMITIVE())
     { if(this.a.equals(this.b)) return Console.cpy(""+this.a);
@@ -83,10 +83,10 @@ public class PrimDiff extends Diff
     String rows = "";// only one row contains two cells
     if(t.isPRIMITIVE())
     { if(this.a.equals(this.b)) 
-        rows = HTML.TR((SIM ? HTML.TD("100%") : "")+
+        rows = HTML.TR((Main.SIM ? HTML.TD("100%") : "")+
                               HTML.TD(HTML.CPY, HTML.encode(""+this.a)));
       else 
-        rows = HTML.TR((SIM ? HTML.TD("0%") : "")+
+        rows = HTML.TR((Main.SIM ? HTML.TD("0%") : "")+
                               HTML.TD(HTML.DEL, HTML.encode(""+this.a))+HTML.TD(HTML.INS, HTML.encode(""+this.b)));
       return HTML.TABLE(rows);
     }
@@ -95,10 +95,10 @@ public class PrimDiff extends Diff
       PrimReal r2=(PrimReal)this.b;
       double acc = r1.typeOf().getAcc();
       if(r1.isSimilar(r2)) 
-        rows = HTML.TR((SIM ? HTML.TD(""+this.getSim().getPercentage1()) : "")+
+        rows = HTML.TR((Main.SIM ? HTML.TD(""+this.getSim().getPercentage1()) : "")+
                               HTML.TD(HTML.CHG, HTML.encode(""+this.a+HTML.encode('~')+this.b)));
       else 
-        rows = HTML.TR((SIM ? HTML.TD("0%") : "")+
+        rows = HTML.TR((Main.SIM ? HTML.TD("0%") : "")+
                               HTML.TD(HTML.DEL, HTML.encode(""+this.a))+HTML.TD(HTML.INS, HTML.encode(""+this.b)));
       return HTML.TABLE(rows);
     }

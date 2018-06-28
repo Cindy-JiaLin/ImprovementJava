@@ -1,14 +1,17 @@
 package utility;
 
+import value.TypeT;
 import diff.Diff;
 import sim.Sim;
-import dcprototype.Console;
-import dcprototype.HTML;
+import dcprototype.*;
 
-public final static class Change extends EditOperation
+public class Change extends EditOperation
 { private final Diff diff;
   public Change(Diff diff){ this.diff=diff;}
 
+  public TypeT getSourceValue(){ return this.diff.getSourceValue();}
+  public TypeT getTargetValue(){ return this.diff.getTargetValue();}
+  
   public boolean refine(){ return diff.refine();}
   public int nextA(int ia){ return ia+1;}
   public int nextB(int ib){ return ib+1;}
@@ -23,7 +26,7 @@ public final static class Change extends EditOperation
   public String html(int ia, int ib)
   { return HTML.TD(HTML.CHG,ia)+
            HTML.TD(HTML.CHG,ib)+
-    (SIM ? HTML.TD(""+(diff.getSim().getPercentage1()) : "")+
+    (Main.SIM ? HTML.TD(""+(diff.getSim().getPercentage1())) : "")+
            HTML.TD(HTML.CHG, diff.html());
   }
 }

@@ -7,7 +7,7 @@ import dcprototype.HTML;
 
 import java.util.ArrayList;
 
-private class Trace
+public class Trace
 { private final Trace trace;
   private final EditOperation op;
   private final TypeT a, b;
@@ -23,8 +23,10 @@ private class Trace
     this.ib = op.nextB(trace == null ? 0 : trace.ib);
     this.sim = op.calculate(trace == null ? this.getUnknown() : trace.getSim());
   }
-  public Trace getTrace(){ return this.trace;}
-  public EditOperation getOp(){ return this.op;}
+  public Trace trace(){ return this.trace;}
+  public EditOperation op(){ return this.op;}
+  public int ia(){ return this.ia;}
+  public int ib(){ return this.ib;}
   public Sim getSim(){ return this.sim;}
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
   /*
@@ -39,7 +41,7 @@ private class Trace
   public String toString()
   { return (this.trace ==  null ? "" : this.trace.toString())+this.op;}
   public String beautify()
-  { return (this.trace == null ? "" : this.trace.beatify())+this.op.beatify();}
+  { return (this.trace == null ? "" : this.trace.beautify())+this.op.beautify();}
   public String html()
   { return (this.trace == null ? "" : this.trace.html())+HTML.TR(op.html(ia,ib));}
 

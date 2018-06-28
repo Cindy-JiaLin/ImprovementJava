@@ -2,13 +2,14 @@ package utility;
 
 import value.TypeT;
 import sim.Sim;
-import dcprototype.Console;
-import dcprototype.HTML;
+import dcprototype.*;
 
 public class Insert extends EditOperation
 { private final TypeT value;
   public Insert(TypeT value){ this.value=value;}
 
+  public TypeT getValue(){ return this.value;}
+  
   public boolean refine(){ return true;}
   public int nextA(int ia){ return ia;}
   public int nextB(int ib){ return ib+1;}
@@ -19,7 +20,7 @@ public class Insert extends EditOperation
   public String html(int ia, int ib)
   { return HTML.TD("")+
            HTML.TD(HTML.INS,ib)+
-    (SIM ? HTML.TD("") : "")+
+    (Main.SIM ? HTML.TD("") : "")+
            HTML.TD(HTML.INS, HTML.encode(""+this.value));
   }
 }

@@ -13,6 +13,23 @@ public class TypeList extends TypeT
   public TypeList(TYPE baseTYPE, List<TypeT> lst)
   { this.baseTYPE = baseTYPE; this.lst = lst;}
   
+  public TYPE getBaseTYPE(){ return this.baseTYPE;}
+  public List<TypeT> getValue(){ return this.lst;}
+  public int size(){ return this.lst.size();} 
+  public TypeT get(int i){ return this.lst.get(i);}
+  public boolean isEmptyList(){ return this.lst.isEmpty();}
+
+  public TYPE typeOf(){ return TYPE.LIST(this.baseTYPE);} 
+  public int weight()
+  { int w = 0;
+    if(this.lst.isEmpty()) return 0;
+    else 
+    { for(int i=0; i<this.lst.size(); i++)
+         w = w+this.lst.get(i).weight();
+    }
+    return w;
+  }
+
   public String toString()
   { if(this.lst.isEmpty()) return "[]";
     else
@@ -36,23 +53,7 @@ public class TypeList extends TypeT
     else throw new RuntimeException("This obj="+obj+" is not an instance of TypeList."); 
   }
   
-  public TYPE getBaseTYPE(){ return this.baseTYPE;}
-  public List<TypeT> getValue(){ return this.lst;}
-  public int size(){ return this.lst.size();} 
-  public TypeT get(int i){ return this.lst.get(i);}
-  public boolean isEmptyList(){ return this.lst.isEmpty();}
-
-  public TYPE typeOf(){ return TYPE.LIST(this.baseTYPE);} 
-  public int weight()
-  { int w = 0;
-    if(this.lst.isEmpty()) return 0;
-    else 
-    { for(int i=0; i<this.lst.size(); i++)
-         w = w+this.lst.get(i).weight();
-    }
-    return w;
-  }
-  
+    
   // append an element at the end of this list
   public TypeList append(TypeT a)
   { List<TypeT> temp = this.lst;
