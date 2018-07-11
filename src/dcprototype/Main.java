@@ -65,9 +65,9 @@ public class Main
     TypeT model1 = model(resTYPE, resV1);
     TypeT model2 = model(resTYPE, resV2);
     
-    //System.out.println("TYPE: "+resTYPE+"\n");
-    //System.out.println("SOURCE: "+model1+"\n");
-    //System.out.println("TARGET: "+model2+"\n");
+    System.out.println("TYPE: "+resTYPE);
+    System.out.println("SOURCE: "+model1);
+    System.out.println("TARGET: "+model2);
     
     if(VERBOSE)
     { System.out.println("SOURCE:"); System.out.println(resV1);
@@ -75,19 +75,20 @@ public class Main
     }    
     if(source!=null && target!=null)
     { if(model1.weight()==0 && model2.weight()==0)// empty value (Lists, Sets, Multisets and Mappings)
-        System.out.println(Console.cpy(""+model1));
+        System.out.println("DIFF: "+Console.cpy(""+model1));
       else
       { Diff diff = Diff.newDiff(resTYPE, model1, model2);
         for(; !diff.refine(); );
-        if(!VERBOSE && DIFF && UNICODE) Encoding.printUnicode(diff.beautify());
-        //if(!VERBOSE && DIFF) System.out.println(""+diff);
+        if(!VERBOSE && DIFF && UNICODE) Encoding.printUnicode("DIFF: "+diff.beautify());
+        if(!VERBOSE && DIFF && !UNICODE) System.out.println(""+diff);
         if(HTMLCODE) writeHTML(diff.html());
-        if(SIM) System.out.println(diff.getSim().getPercentage());
+        if(SIM) System.out.println("SIM: "+diff.getSim().getPercentage());
       }
     }
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;
     System.out.println("duration:"+totalTime+"s");
+    System.out.println("--------------------------------------------------------------");
   }
 
   // build a html file and present diff in html format

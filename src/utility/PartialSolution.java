@@ -102,31 +102,28 @@ public class PartialSolution
     if(T.isSTRING())
     { PrimString sourceStr = (PrimString)this.a;
       PrimString targetStr = (PrimString)this.b;
-      TypeT memSource = new PrimChar(TYPE.CHAR, sourceStr.charAt(getSource()));
-      TypeT memTarget = new PrimChar(TYPE.CHAR, targetStr.charAt(getTarget()));
       if(targetStr.weight() ==  getTarget())
       { if(sourceStr.weight() == getSource()) return new PartialSolution[0];
-        else return new PartialSolution[]{ delete(memSource)};
+        else return new PartialSolution[]{ delete(new PrimChar(TYPE.CHAR, sourceStr.charAt(getSource())))};
       }
       else if(sourceStr.weight() == getSource()) 
-           return new PartialSolution[]{ insert(memTarget)};
-      else if(memSource == memTarget) 
-           return new PartialSolution[]{ copy(memSource)};
-      else return new PartialSolution[]{ insert(memTarget), delete(memSource)};
+           return new PartialSolution[]{ insert(new PrimChar(TYPE.CHAR, targetStr.charAt(getTarget())))};
+      else if(sourceStr.charAt(getSource())==targetStr.charAt(getTarget())) 
+           return new PartialSolution[]{ copy(new PrimChar(TYPE.CHAR, sourceStr.charAt(getSource())))};
+      else return new PartialSolution[]{ insert(new PrimChar(TYPE.CHAR, targetStr.charAt(getTarget()))), 
+                                         delete(new PrimChar(TYPE.CHAR, sourceStr.charAt(getSource())))};
     }
     /*TypeProduct*/
     else if(T.isPRODUCT())
     { TypeProduct sourceProduct = (TypeProduct)this.a;
       TypeProduct targetProduct = (TypeProduct)this.b;
-      TypeT memSource = sourceProduct.getValues().get(getSource());
-      TypeT memTarget = targetProduct.getValues().get(getTarget());
-      return new PartialSolution[]{ change(memSource, memTarget)};
+      return new PartialSolution[]{ change(sourceProduct.getValues().get(getSource()), targetProduct.getValues().get(getTarget()))};
     }
     /*TypeUnion*/
     else if(T.isUNION()) 
     { TypeUnion sourceUnion = (TypeUnion)this.a;
       TypeUnion targetUnion = (TypeUnion)this.b;
-      if(sourceUnion.getLabel().equals(targetUnion.getLabel())) 
+      if(!sourceUnion.getLabel().equals(targetUnion.getLabel())) 
         return new PartialSolution[]{ replace(sourceUnion,targetUnion)};
       else return new PartialSolution[]{ change(sourceUnion.getValue(),targetUnion.getValue())};
     }
@@ -134,19 +131,18 @@ public class PartialSolution
     else if(T.isLIST())
     { TypeList sourceList = (TypeList)this.a;
       TypeList targetList = (TypeList)this.b;
-      TypeT memSource = sourceList.get(getSource());
-      TypeT memTarget = targetList.get(getTarget());
       if(targetList.size() ==  getTarget())
       { if(sourceList.size() == getSource()) return new PartialSolution[0];
-        else return new PartialSolution[]{ delete(memSource)};
+        else return new PartialSolution[]{ delete(sourceList.get(getSource()))};
       }
       else if(sourceList.size() == getSource()) 
-             return new PartialSolution[]{ insert(memTarget)};
-      else if(memSource.weight()==0)// delete an empty line  
-             return new PartialSolution[]{ delete(memSource), insert(memTarget)};
-      else if(memTarget.weight()==0)// insert an empty line
-             return new PartialSolution[]{ delete(memSource), insert(memTarget)};      
-      else return new PartialSolution[]{ change(memSource, memTarget), insert(memTarget), delete(memSource)};
+             return new PartialSolution[]{ insert(targetList.get(getTarget()))};
+      else if(sourceList.get(getSource()).weight()==0)// delete an empty line  
+             return new PartialSolution[]{ delete(sourceList.get(getSource())), 
+                                           insert(targetList.get(getTarget()))};
+      else if(targetList.get(getTarget()).weight()==0)// insert an empty line
+             return new PartialSolution[]{ delete(sourceList.get(getSource())), insert(targetList.get(getTarget()))};      
+      else return new PartialSolution[]{ change(sourceList.get(getSource()), targetList.get(getTarget())), insert(targetList.get(getTarget())), delete(sourceList.get(getSource()))};
     }
     /*TypeSet*/
     else if(T.isSET())
@@ -162,20 +158,26 @@ public class PartialSolution
         else return new PartialSolution[0];
       }
       else// when both are non-empty
-      { ArrayList<TypeT> targets = trace.getTargetValues();
+      { ArrayList<TypeT> targets;
+        if(this.trace == null) targets = new ArrayList<>();
+        else targets = this.trace.getTargetValues();
+
         PartialSolution[] temp = new PartialSolution[2*targets.size()+1];
+        // targets.size() == 0
+        if(sourceSet.get(getSource()).equals(targetSet.get(getTarget())))
+          temp[2*targets.size()] = copy(sourceSet.get(getSource()));
+        else temp[2*targets.size()] = delete(sourceSet.get(getSource()));
+        
         int k=0;// k is the number of repeat insertion elements in b
+        // targets.size() > 0
         for(int i=0; i<targets.size(); i++)
-        { if(trace == null||(!trace.getTargetValues().contains(targets.get(i))))
-            temp[2*i]=change(sourceSet.get(getSource()), targets.get(i));//
-          else {temp[2*i]=null; k++;}
-          if(trace == null||(!trace.getTargetValues().contains(targets.get(i))))
-            temp[2*i+1]=insert(targets.get(i));
-          else {temp[2*i+1]=null; k++;}
+        { if(!targets.contains(targetSet.get(i)))
+          { temp[2*i] = change(sourceSet.get(getSource()), targetSet.get(i));//
+            temp[2*i+1] = insert(targetSet.get(i));
+          }
+          else { temp[2*i] = null; temp[2*i+1] = null; k++;}
         }
-        temp[2*targets.size()]=delete(sourceSet.get(getSource()));
-        //return temp;
-        if(k==0) return temp;
+        if(k == 0) return temp;
         else
         { PartialSolution[] res = new PartialSolution[2*targets.size()+1-k];
           int n=0;

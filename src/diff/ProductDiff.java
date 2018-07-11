@@ -15,22 +15,21 @@ public class ProductDiff extends Diff
   
   private final static SimComparator simComparator = new SimComparator();
    
-  public TypeT getSourceValue(){ return this.a;}
-  public TypeT getTargetValue(){ return this.b;}
- 
   public ProductDiff(TypeProduct a, TypeProduct b)
-  { // These two product values must have the same size
-    if(a.size()!=b.size()) 
-       throw new RuntimeException("Different size Product values cannot be compared.");
+  { if(a.size()!=b.size())// These two product values must have the same size 
+      throw new RuntimeException("Different size Product values cannot be compared.");
     this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null,a,b)};
   }        
   
+  public TypeProduct getSourceValue(){ return this.a;}
+  public TypeProduct getTargetValue(){ return this.b;}
+  
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());} 
   public Sim getSim(){ return this.candidates[0].getSim();}
  
-  public String toString(){ return this.candidates[0].toString();}
-  public String beautify(){ return this.candidates[0].beautify();}
+  public String toString(){ return "("+this.candidates[0].toString()+")";}
+  public String beautify(){ return Console.cpy("(")+this.candidates[0].beautify()+Console.cpy(")");}
   public String html(){ return this.candidates[0].html();}
 
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}

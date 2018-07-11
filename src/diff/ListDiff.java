@@ -20,8 +20,9 @@ public class ListDiff extends Diff
     this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null,a,b)};
   }        
-  public TypeT getSourceValue(){ return this.a;}
-  public TypeT getTargetValue(){ return this.b;}
+  
+  public TypeList getSourceValue(){ return this.a;}
+  public TypeList getTargetValue(){ return this.b;}
  
   public Sim getSim(){ return this.candidates[0].getSim();}  
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
@@ -44,10 +45,6 @@ public class ListDiff extends Diff
       Arrays.sort(this.candidates, simComparator);
       return false;
     }
-    // the intermediate state, the trace is not null
-    // this.candidates[0].refine() is determined by the trace.refine()
-    // if the current EditOperation is Change, the trace.refine() return false
-    // which means one more inside refine step needs to do
     else if(!this.candidates[0].refine())
     { Arrays.sort(this.candidates, simComparator);// sort the candidates after each inside refine step
       return false;

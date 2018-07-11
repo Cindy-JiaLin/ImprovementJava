@@ -22,8 +22,8 @@ public class SetDiff extends Diff
     this.candidates = new PartialSolution[] { new PartialSolution(null,a,b)};
   }        
   
-  public TypeT getSourceValue(){ return this.a;}
-  public TypeT getTargetValue(){ return this.b;}
+  public TypeSet getSourceValue(){ return this.a;}
+  public TypeSet getTargetValue(){ return this.b;}
    
   public Sim getSim(){ return this.candidates[0].getSim();}  
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}

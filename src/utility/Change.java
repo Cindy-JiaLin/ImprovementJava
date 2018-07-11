@@ -2,6 +2,7 @@ package utility;
 
 import value.TypeT;
 import diff.Diff;
+import diff.UnionDiff;
 import sim.Sim;
 import dcprototype.*;
 
@@ -22,7 +23,7 @@ public class Change extends EditOperation
   }
   
   public String toString(){ return ""+diff;}
-  public String beautify(){ return Console.chg(""+this.diff);}
+  public String beautify(){ return Console.chg(""+this.diff.beautify());}
   public String html(int ia, int ib)
   { return HTML.TD(HTML.CHG,ia)+
            HTML.TD(HTML.CHG,ib)+

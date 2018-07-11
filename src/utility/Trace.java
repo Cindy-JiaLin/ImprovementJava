@@ -48,29 +48,17 @@ public class Trace
 
   // expand() for DiffSet
   public ArrayList<TypeT> getTargetValues()
-  { if(this.trace == null)
-    { ArrayList<TypeT> res = new ArrayList<>();
-      if(op instanceof Insert) 
-      { Insert ins = (Insert)op;
-        res.add(ins.getValue());
-      }
-      if(op instanceof Change)
-      { Change chg = (Change)op;
-        res.add(chg.getTargetValue());
-      }
-      return res;
+  { ArrayList<TypeT> res;
+    if(this.trace == null) res = new ArrayList<>();
+    else res = this.trace.getTargetValues();
+    if(op instanceof Insert) 
+    { Insert ins = (Insert)op;
+      res.add(ins.getValue());
     }
-    else
-    { ArrayList<TypeT> res=trace.getTargetValues();
-      if(op instanceof Insert) 
-      { Insert ins = (Insert)op;
-        res.add(ins.getValue());
-      }
-      if(op instanceof Change)
-      { Change chg = (Change)op;
-        res.add(chg.getTargetValue());
-      }
-      return res;
+    if(op instanceof Change)
+    { Change chg = (Change)op;
+      res.add(chg.getTargetValue());
     }
+    return res;
   }
 }

@@ -17,8 +17,8 @@ public class PrimStringDiff extends Diff
   { this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null,a,b)};
   }        
-  public TypeT getSourceValue(){ return this.a;}
-  public TypeT getTargetValue(){ return this.b;}
+  public PrimString getSourceValue(){ return this.a;}
+  public PrimString getTargetValue(){ return this.b;}
   
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());} 
   public Sim getSim(){ return this.candidates[0].getSim();}  

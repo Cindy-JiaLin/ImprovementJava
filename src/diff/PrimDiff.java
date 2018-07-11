@@ -51,14 +51,14 @@ public class PrimDiff extends Diff
   { TYPE t = this.a.typeOf();
     if(t.isPRIMITIVE())
     { if(this.a.equals(this.b)) return "="+this.a;
-      else return "-"+this.a+", +"+this.b;
+      else return "-"+this.a+"+"+this.b;
     }
     else if(t.isREAL())
     { PrimReal r1=(PrimReal)this.a;
       PrimReal r2=(PrimReal)this.b;
       double acc = r1.typeOf().getAcc();
       if(r1.isSimilar(r2)) return this.a+"~"+this.b;
-      else return "-"+this.a+", +"+this.b;
+      else return "-"+this.a+"+"+this.b;
     }
     else throw new RuntimeException("Type error, must be the primitive type.");
      

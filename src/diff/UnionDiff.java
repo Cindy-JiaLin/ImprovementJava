@@ -1,7 +1,6 @@
 package diff;
 
 import java.util.Arrays;
-import java.util.Comparator;
 
 import sim.*;
 import type.*;
@@ -20,14 +19,22 @@ public class UnionDiff extends Diff
   { this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null,a,b)};
   }        
-  public TypeT getSourceValue(){ return this.a;}
-  public TypeT getTargetValue(){ return this.b;}
+  public TypeUnion getSourceValue(){ return this.a;}
+  public TypeUnion getTargetValue(){ return this.b;}
  
   public Sim getSim(){ return this.candidates[0].getSim();}  
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
   
-  public String toString(){ return ""+this.candidates[0];}
-  public String beautify(){ return this.candidates[0].beautify();}
+  public String toString()
+  { if(this.a.getLabel().equals(this.b.getLabel()))
+      return this.a.getLabel()+"."+this.candidates[0];
+    else return "MISMATCH: "+this.candidates[0];
+  }
+  public String beautify()
+  { if(this.a.getLabel().equals(this.b.getLabel()))
+      return Console.cpy(this.a.getLabel()+".")+this.candidates[0].beautify();
+    else return "MISMATCH: "+this.candidates[0].beautify();
+  }
   public String html(){ return this.candidates[0].html();}
   
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
