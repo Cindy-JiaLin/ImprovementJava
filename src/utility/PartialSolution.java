@@ -157,6 +157,7 @@ public class PartialSolution
           return new PartialSolution[]{ insert(targetSet.get(getTarget()))};
         else return new PartialSolution[0];
       }
+      /* Problem:
       else// when both are non-empty
       { ArrayList<TypeT> targets;
         if(this.trace == null) targets = new ArrayList<>();
@@ -186,6 +187,7 @@ public class PartialSolution
           return res;
         }
       }
+      */ 
     }
     else throw new RuntimeException("expand() for other TYPE.");
   }
