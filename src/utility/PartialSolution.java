@@ -157,37 +157,26 @@ public class PartialSolution
           return new PartialSolution[]{ insert(targetSet.get(getTarget()))};
         else return new PartialSolution[0];
       }
-      /* Problem:
       else// when both are non-empty
-      { ArrayList<TypeT> targets;
-        if(this.trace == null) targets = new ArrayList<>();
-        else targets = this.trace.getTargetValues();
-
-        PartialSolution[] temp = new PartialSolution[2*targets.size()+1];
-        // targets.size() == 0
-        if(sourceSet.get(getSource()).equals(targetSet.get(getTarget())))
-          temp[2*targets.size()] = copy(sourceSet.get(getSource()));
-        else temp[2*targets.size()] = delete(sourceSet.get(getSource()));
-        
+      { PartialSolution[] temp = new PartialSolution[2*targetSet.size()+1];
         int k=0;// k is the number of repeat insertion elements in b
-        // targets.size() > 0
-        for(int i=0; i<targets.size(); i++)
-        { if(!targets.contains(targetSet.get(i)))
+        for(int i=0; i<targetSet.size(); i++)
+        { if(trace == null || !this.trace.getTargetValues().contains(targetSet.get(i)))
           { temp[2*i] = change(sourceSet.get(getSource()), targetSet.get(i));//
             temp[2*i+1] = insert(targetSet.get(i));
           }
-          else { temp[2*i] = null; temp[2*i+1] = null; k++;}
+          else { temp[2*i] = null; temp[2*i+1] = null; k=k+2;}
         }
+        temp[2*targetSet.size()] = delete(sourceSet.get(getSource()));
         if(k == 0) return temp;
         else
-        { PartialSolution[] res = new PartialSolution[2*targets.size()+1-k];
+        { PartialSolution[] res = new PartialSolution[2*targetSet.size()+1-k];
           int n=0;
           for(int i=0; i<temp.length; i++)
             if(temp[i]!=null) res[n++]=temp[i];
           return res;
         }
       }
-      */ 
     }
     else throw new RuntimeException("expand() for other TYPE.");
   }
